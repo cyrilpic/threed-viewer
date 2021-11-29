@@ -1,0 +1,10 @@
+env:
+  browser: true
+  es2017: true
+extends:
+  - google
+parserOptions:
+  ecmaVersion: 8
+  sourceType: module
+rules:
+  require-jsdoc: off
