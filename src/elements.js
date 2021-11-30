@@ -63,24 +63,61 @@ viewerTmpl.innerHTML = `
   <div id="viewer"></div>
 `;
 
+// Custom events
+
+class UpdateEvent extends Event {
+  constructor() {
+    super( 'updated', {bubbles: true} );
+  }
+}
+
+// Custom elements
+
 class ModelElement extends HTMLElement {
   constructor() {
     super();
     this.geometry = null;
+    this.model = null;
+    this._viewerDOM = null;
   }
 
   connectedCallback() {
     const scope = this;
-    new Loader( this, ( geometry, model ) => {
-      scope.geometry = geometry;
-      for ( const a of scope.querySelectorAll( 'threed-annotation' ) ) {
-        model.add( a.annotation( geometry ) );
+    this._viewerDOM = this.parentElement;
+    if ( this.model ) {
+      this.parentElement.viewer.addContent( this.model );
+    } else {
+      new Loader( this, ( geometry, model ) => {
+        scope.geometry = geometry;
+        scope.model = model;
+        const event = new CustomEvent('loaded', {geometry: scope.geometry});
+        scope.dispatchEvent( event );
+        scope._viewerDOM.viewer.addContent( model );
+      } );
+    }
+  }
+
+  disconnectedCallback() {
+    if ( this.model ) {
+      this.model.removeFromParent();
+      if ( this._viewerDOM ) {
+        this._viewerDOM.dispatchEvent( new UpdateEvent() );
+        this._viewerDOM = null;
       }
-      scope.parentElement.viewer.addContent( model );
-    } );
+    }
+  }
+
+  get loaded() {
+    return this.model instanceof THREE.Object3D;
   }
 
   get src() {
+    if ( !this.hasAttribute('src') || !!!this.getAttribute('src') ) {
+      const aTag = this.querySelector( 'a' );
+      if ( aTag ) {
+        this.setAttribute( 'src', aTag.getAttribute( 'href' ) );
+      }
+    }
     return this.getAttribute('src');
   }
 
@@ -103,14 +140,52 @@ class ModelElement extends HTMLElement {
 }
 
 class AnnotationElement extends HTMLElement {
-  annotation( model_geometry ) {
-    const annote_m = new THREE.MeshStandardMaterial( {color: this.color} );
+  constructor() {
+    super();
+    this._annotation = undefined;
+    this._modelDOM = undefined;
+  }
+
+  connectedCallback() {
+    this._modelDOM = this.parentElement;
+    const scope = this;
+    const add = () => {
+      scope._modelDOM.model.add( scope.annotation );
+      scope.dispatchEvent( new UpdateEvent() );
+    };
+    this._modelDOM.addEventListener( 'loaded', (event) => {
+      this._annotation = undefined;
+      add();
+    });
+    if ( this._modelDOM.loaded ) {
+      add();
+    }
+  }
+  disconnectedCallback() {
+    if ( this._annotation ) {
+      this._annotation.removeFromParent();
+      if ( this._annotation instanceof THREE.Object3D ) {
+        this._annotation.geometry.dispose();
+        this._annotation.material.dispose();
+      }
+      this._annotation = undefined;
+      if ( this._modelDOM ) {
+        this._modelDOM.dispatchEvent( new UpdateEvent() );
+      }
+    }
+  }
+
+  get annotation() {
+    if ( this._annotation ) {
+      return this._annotation;
+    }
+    const annoteM = new THREE.MeshStandardMaterial( {color: this.color} );
     if ( this.kind === 'sphere' ) {
       const geometry = new THREE.SphereGeometry( 0.5 );
-      const sphere = new THREE.Mesh( geometry, annote_m );
-      const position = this.positionInGeometry( model_geometry );
+      const sphere = new THREE.Mesh( geometry, annoteM );
+      const position = this.positionInGeometry();
       sphere.position.set( position.x, position.y, position.z );
-      return sphere;
+      this._annotation = sphere;
     } else if ( this.kind === 'label' ) {
       const labelDiv = document.createElement( 'div' );
       labelDiv.className = 'label';
@@ -118,17 +193,17 @@ class AnnotationElement extends HTMLElement {
       labelDiv.style.marginTop = '-1em';
       labelDiv.style.color = this.color;
       const label = new CSS2DObject( labelDiv );
-      const position = this.positionInGeometry( model_geometry );
+      const position = this.positionInGeometry();
       label.position.set( position.x, position.y, position.z );
-      return label;
+      this._annotation = label;
     } else if ( this.kind === 'cylinder' ) {
-      const position = this.positionInGeometry( model_geometry );
+      const position = this.positionInGeometry();
       if ( position.length != 2 ) {
         console.error( 'Invalid length' );
       }
 
       const geometry = new THREE.CylinderGeometry( 0.2, 0.2, position[0].distanceTo( position[1] ), 20 );
-      const cylinder = new THREE.Mesh( geometry, annote_m );
+      const cylinder = new THREE.Mesh( geometry, annoteM );
       const midpoint = new THREE.Vector3();
       midpoint.addVectors( position[0], position[1] );
       midpoint.divideScalar( 2 );
@@ -142,11 +217,13 @@ class AnnotationElement extends HTMLElement {
 
       cylinder.applyQuaternion( rotation );
 
-      return cylinder;
+      this._annotation = cylinder;
     }
+    return this._annotation;
   }
 
-  positionInGeometry( geometry ) {
+  positionInGeometry() {
+    const geometry = this._modelDOM.geometry;
     const parts = this.position.split( ';' );
     const out = [];
     for ( const p of parts ) {
@@ -155,9 +232,10 @@ class AnnotationElement extends HTMLElement {
         const [x, y, z] = position.split( ',' );
         out.push( new THREE.Vector3( x, y, z ) );
       } else if ( reference == 'vertex' ) {
-        const x = geometry.getAttribute( 'position' ).getX( parseInt( position ) );
-        const y = geometry.getAttribute( 'position' ).getY( parseInt( position ) );
-        const z = geometry.getAttribute( 'position' ).getZ( parseInt( position ) );
+        const p = parseInt( position );
+        const x = geometry.getAttribute( 'position' ).getX( p );
+        const y = geometry.getAttribute( 'position' ).getY( p );
+        const z = geometry.getAttribute( 'position' ).getZ( p );
         out.push( new THREE.Vector3( x, y, z ) );
       }
     }
@@ -167,12 +245,35 @@ class AnnotationElement extends HTMLElement {
     return out;
   }
 
-  get kind() {
-    return this.getAttribute( 'kind' );
+  static get observedAttributes() {
+    return ['color', 'text'];
   }
 
-  get reference() {
-    return this.getAttribute( 'reference' );
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (this._annotation === undefined) {
+      return;
+    }
+    switch ( name ) {
+      case 'color':
+        if ( this._annotation instanceof CSS2DObject ) {
+          this._annotation.element.style.color = this.color;
+        } else {
+          this._annotation.material.color.setStyle(this.color);
+        }
+        break;
+      case 'text':
+        if ( this._annotation instanceof CSS2DObject ) {
+          this._annotation.element.textContent = this.text;
+        }
+        break;
+      default:
+        break;
+    }
+    this.dispatchEvent( new UpdateEvent() );
+  }
+
+  get kind() {
+    return this.getAttribute( 'kind' );
   }
 
   get position() {
@@ -183,21 +284,44 @@ class AnnotationElement extends HTMLElement {
     return this.getAttribute( 'color' );
   }
 
+  set color( c ) {
+    if ( c ) {
+      this.setAttribute( 'color', c );
+    } else {
+      this.removeAttribute( 'color' );
+    }
+  }
+
   get text() {
     return this.getAttribute( 'text' );
+  }
+
+  set text(t) {
+    if ( t ) {
+      this.setAttribute( 'text', t );
+    } else {
+      this.removeAttribute( 'text' );
+    }
   }
 }
 
 class ViewerElement extends HTMLElement {
   constructor() {
     super(); // always call super() first in the constructor.
+
+    // Prepare shadow DOM
     const shadowRoot = this.attachShadow({mode: 'open'});
     shadowRoot.appendChild(viewerTmpl.content.cloneNode(true));
+
+    this.viewer = null;
+    const scope = this;
+    this.addEventListener( 'updated', () => {
+      if ( scope.viewer ) scope.viewer.animating = true;
+    } );
   }
 
   connectedCallback() {
-    this.shadowRoot.styleSheets[0].cssRules[0].style.height = this.getAttribute('height');
-    this.shadowRoot.styleSheets[0].cssRules[0].style.width = this.getAttribute('width');
+    this.updateSize();
 
     const options = {
       grid: this.grid,
@@ -211,6 +335,13 @@ class ViewerElement extends HTMLElement {
     };
 
     this.viewer = new Viewer( this.shadowRoot.getElementById('viewer'), options );
+  }
+
+  updateSize() {
+    const viewerCssRule = this.shadowRoot.styleSheets[0].cssRules[0];
+    viewerCssRule.style.height = this.getAttribute('height');
+    viewerCssRule.style.width = this.getAttribute('width');
+    if ( this.viewer ) this.viewer.resize();
   }
 
 
@@ -246,8 +377,19 @@ class ViewerElement extends HTMLElement {
     return this.hasAttribute('help');
   }
 
+  static get observedAttributes() {
+    return ['width', 'height'];
+  }
   // Monitor changes to HTML attributes
   attributeChangedCallback(name, oldValue, newValue) {
+    switch ( name ) {
+      case 'width':
+      case 'height':
+        this.updateSize();
+        break;
+      default:
+        break;
+    }
   }
 }
 

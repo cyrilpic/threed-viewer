@@ -1,13 +1,14 @@
 import * as THREE from 'three';
 
 import {icon} from '@fortawesome/fontawesome-svg-core';
-import {faUndo, faEdit} from '@fortawesome/free-solid-svg-icons';
-import {faEdit as farEdit} from '@fortawesome/free-regular-svg-icons';
+import {faUndo} from '@fortawesome/free-solid-svg-icons';
 
 import {ArcballControls} from 'three/examples/jsm/controls/ArcballControls.js';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import {AxisHelper} from './AxisHelper.js';
 import {Button} from './Button.js';
+
+const perspectiveDistance = 25;
 
 /**
  * Main viewer class
@@ -40,19 +41,8 @@ class Viewer {
     // Create scene
     this.scene = new THREE.Scene();
 
-    // Create cameras
-    // const orthographicDistance = 120;
-    const perspectiveDistance = 25;
-
-    const getOthographicPosition = () => {
-      const aspect = container.clientWidth / container.clientHeight;
-      const halfFovV = THREE.MathUtils.DEG2RAD * 45 * 0.5;
-      const halfFovH = Math.atan( ( aspect ) * Math.tan( halfFovV ) );
-      const halfW = perspectiveDistance * Math.tan( halfFovH );
-      const halfH = perspectiveDistance * Math.tan( halfFovV );
-      return [- halfW, halfW, halfH, - halfH];
-    };
-    const opos = getOthographicPosition();
+    // Create camera
+    const opos = this.getOthographicPosition();
     this.camera = new THREE.OrthographicCamera( opos[0], opos[1], opos[2], opos[3], -2000, 2000 );
     this.camera.position.copy( options.camera_position );
     this.camera.position.multiplyScalar( perspectiveDistance );
@@ -77,26 +67,18 @@ class Viewer {
 
     container.appendChild( this.renderer.domElement );
 
-    this.label_renderer = new CSS2DRenderer();
-    this.label_renderer.setSize( container.clientWidth, container.clientHeight );
-    this.label_renderer.domElement.style.position = 'absolute';
-    this.label_renderer.domElement.style.top = '0px';
-    container.appendChild( this.label_renderer.domElement );
+    this.labelRenderer = new CSS2DRenderer();
+    this.labelRenderer.setSize( container.clientWidth, container.clientHeight );
+    this.labelRenderer.domElement.style.position = 'absolute';
+    this.labelRenderer.domElement.style.top = '0px';
+    container.appendChild( this.labelRenderer.domElement );
 
     window.addEventListener( 'resize', (e) => {
-      const opos = getOthographicPosition();
-      scope.camera.left = opos[0];
-      scope.camera.right = opos[1];
-      scope.camera.top = opos[2];
-      scope.camera.bottom = opos[3];
-      scope.camera.updateProjectionMatrix();
-
-      scope.renderer.setSize( scope.container.clientWidth, scope.container.clientHeight );
-      scope.label_renderer.setSize( scope.container.clientWidth, scope.container.clientHeight );
+      scope.resize();
     } );
 
     // Controls
-    this.controls = new ArcballControls( this.camera, this.label_renderer.domElement, this.scene );
+    this.controls = new ArcballControls( this.camera, this.labelRenderer.domElement, this.scene );
     this.controls.enabled = options.controls;
     this.controls.setGizmosVisible( false );
 
@@ -139,10 +121,6 @@ class Viewer {
       }
     };
 
-    //
-    // this.sphereInter = new THREE.Mesh( new THREE.SphereGeometry( 0.5 ), new THREE.MeshBasicMaterial( {color: 0x00ff00} ) );
-    // this.sphereInter.visible = false;
-    // this.scene.add( this.sphereInter );
     // Toolbar
     if ( ( options.toolbar !== false ) && ( options.toolbar !== null ) ) {
       this.buildToolbar( options );
@@ -171,9 +149,33 @@ class Viewer {
     this.controls.addEventListener( 'change', () => {
       scope.render();
     } );
-
-    this.objects = [];
   }
+
+  getOthographicPosition() {
+    const aspect = this.container.clientWidth / this.container.clientHeight;
+    const halfFovV = THREE.MathUtils.DEG2RAD * 45 * 0.5;
+    const halfFovH = Math.atan( ( aspect ) * Math.tan( halfFovV ) );
+    const halfW = perspectiveDistance * Math.tan( halfFovH );
+    const halfH = perspectiveDistance * Math.tan( halfFovV );
+    return [- halfW, halfW, halfH, - halfH];
+  }
+
+  resize() {
+    const opos = this.getOthographicPosition();
+    this.camera.left = opos[0];
+    this.camera.right = opos[1];
+    this.camera.top = opos[2];
+    this.camera.bottom = opos[3];
+    this.camera.updateProjectionMatrix();
+
+    this.renderer.setSize( this.container.clientWidth,
+        this.container.clientHeight );
+    this.labelRenderer.setSize( this.container.clientWidth,
+        this.container.clientHeight );
+
+    this.animating = true;
+  }
+
   buildToolbar( options ) {
     this.toolbar = document.createElement( 'nav' );
     this.toolbar.setAttribute( 'id', 'toolbar' );
@@ -183,49 +185,11 @@ class Viewer {
 
     const scope = this;
 
-    // this.pointer = new THREE.Vector2(-5, -5);
-    // const editEvent = ( event ) => {
-    //   // const opos = getOthographicPosition();
-    //   scope.pointer.x = ( event.layerX / scope.label_renderer.domElement.clientWidth ) * 2 - 1;
-    //   scope.pointer.y = - ( event.layerY / scope.label_renderer.domElement.clientHeight ) * 2 + 1;
-    //   scope.animating = true;
-    // };
-
     this.handleEvents = (name, e) => {
       switch (name) {
         case 'reset-view':
           scope.controls.reset();
           scope.showMessage( 'Reset view' );
-          break;
-        case 'toggle-ambient':
-          scope.a_light.visible = !scope.a_light.visible;
-          if ( scope.a_light.visible ) {
-            scope.showMessage('Ambient light on');
-          } else {
-            scope.showMessage('Ambient light off');
-          }
-          this.animating = true;
-          break;
-        case 'toggle-dir':
-          if ( scope.d_light.visible ) {
-            if ( scope.d_light.position.z == 1 ) {
-              scope.d_light.position.z = 0;
-              scope.d_light.position.x = 1;
-              scope.showMessage('Light from x');
-            } else if ( scope.d_light.position.x == 1) {
-              scope.d_light.position.x = 0;
-              scope.d_light.position.y = 1;
-              scope.showMessage('Light from y');
-            } else if ( scope.d_light.position.y == 1) {
-              scope.d_light.visible = false;
-              scope.showMessage('Light off');
-            }
-          } else {
-            scope.d_light.position.set( 0, 0, 1 );
-            scope.d_light.visible = true;
-            scope.showMessage('Light from z');
-          }
-          this.animating = true;
           break;
         default:
           break;
@@ -236,27 +200,6 @@ class Viewer {
     const reset_btn = new Button( 'reset-view', this.handleEvents, icon( faUndo ).html );
     this.toolbar.appendChild( reset_btn.dom );
     this.buttons['reset_btn'] = reset_btn;
-
-    // if ( options.selector ) {
-    //   const selector_btn = new Button( 'toggle-selector', this.handleEvents, icon( farEdit ).html, icon( faEdit ).html );
-    //   this.toolbar.appendChild( selector_btn.dom );
-    //   selector_btn.controls = options.controls;
-    //   this.buttons['selector_btn'] = selector_btn;
-    // }
-
-    // Ambient Light
-    // const light_btn = new Button( 'toggle-ambient', this.handleEvents, icon( faSun ).html, icon( farSun ).html );
-    // this.toolbar.appendChild( light_btn.dom );
-    // this.buttons['light_btn'] = light_btn;
-
-    // Directional light
-    // const dir_btn = new Button ( 'toggle-dir', this.handleEvents, icon( faCube ).html);
-    // this.toolbar.appendChild( dir_btn.dom );
-    // this.buttons['dir_btn'] = dir_btn;
-  }
-
-  addSelector() {
-
   }
 
   showMessage( message ) {
@@ -273,7 +216,6 @@ class Viewer {
   }
 
   addContent( object ) {
-    this.objects.push( object );
     this.scene.add( object );
     this.animating = true;
   }
@@ -284,7 +226,7 @@ class Viewer {
     this.renderer.render( this.scene, this.camera );
     this.scene.remove( this.grid );
 
-    this.label_renderer.render( this.scene, this.camera );
+    this.labelRenderer.render( this.scene, this.camera );
 
     this.renderer.autoClear = false;
     this.view_axes.render( this.renderer );
