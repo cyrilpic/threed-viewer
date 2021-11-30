@@ -22,7 +22,7 @@ viewerTmpl.innerHTML = `
     #toolbar a {
         display: block;
         padding: 6px 8px 0px;
-        color: #0d6efd;
+        color: #495057;
     }
     #toolbar svg {
         width: 1.1em;
@@ -56,7 +56,7 @@ viewerTmpl.innerHTML = `
         position: absolute;
         bottom: 0;
         left: 5px;
-        color: white;
+        color: #495057;
         font-size:0.8rem;
     }
   </style>

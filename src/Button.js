@@ -6,11 +6,9 @@ class Button {
     this.iconSelected = iconSelected;
 
     this.dom = document.createElement( 'a' );
-    this.dom.setAttribute( 'class', 'nav-link' );
     this.dom.setAttribute( 'data-action', this.name );
     this.dom.setAttribute( 'href', '#' );
     this.dom.innerHTML = this.icon;
-    this.dom.setAttribute( 'data-bs-toggle', 'tooltip' );
     this.dom.setAttribute( 'title', this.name );
     this.state = false;
 

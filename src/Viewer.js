@@ -65,7 +65,7 @@ class Viewer {
     this.renderer.setPixelRatio( window.devicePixelRatio );
     this.renderer.outputEncoding = sRGBEncoding;
     this.renderer.setSize( container.clientWidth, container.clientHeight );
-    this.renderer.setClearColor( 0xaaaaaa );
+    this.renderer.setClearColor( 0xcccccc );
 
     container.appendChild( this.renderer.domElement );
 
