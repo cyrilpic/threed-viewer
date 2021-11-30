@@ -1,11 +1,12 @@
-import * as THREE from 'three';
+import {EdgesGeometry, Group, LineBasicMaterial, LineSegments,
+  Mesh, MeshStandardMaterial, Vector3} from 'three';
 // import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
 import {STLLoader} from 'three/examples/jsm/loaders/STLLoader.js';
 
 class Loader {
   constructor( options, onLoad ) {
-    const wireM = new THREE.LineBasicMaterial( {color: 0xff0000, linewidth: 1} );
-    const facesM = new THREE.MeshStandardMaterial( {color: 0x9dc2cf} );
+    const wireM = new LineBasicMaterial( {color: 0xff0000, linewidth: 1} );
+    const facesM = new MeshStandardMaterial( {color: 0x9dc2cf} );
 
     const loader = new STLLoader();
     // if ( options.src.endsWith( '.stl' ) ) {
@@ -19,10 +20,10 @@ class Loader {
     // }
 
     loader.load( options.src, (geom) => {
-      const model = new THREE.Group();
+      const model = new Group();
       if (geom.hasColor) console.log('hasColor');
       // Scale down to match view
-      const size = new THREE.Vector3();
+      const size = new Vector3();
       if ( options.center ) {
         geom.center();
       }
@@ -35,9 +36,9 @@ class Loader {
         geom.scale( options.scale, options.scale, options.scale );
       }
 
-      model.add( new THREE.Mesh( geom, facesM ) );
+      model.add( new Mesh( geom, facesM ) );
 
-      model.add( new THREE.LineSegments( new THREE.EdgesGeometry( geom ), wireM ) );
+      model.add( new LineSegments( new EdgesGeometry( geom ), wireM ) );
 
       onLoad( geom, model );
     } );

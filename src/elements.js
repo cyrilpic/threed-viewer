@@ -1,5 +1,5 @@
-/* eslint-disable require-jsdoc */
-import * as THREE from 'three';
+import {CylinderGeometry, Object3D, Mesh, MeshStandardMaterial,
+  SphereGeometry, Vector3} from 'three';
 import {CSS2DObject} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import {Loader} from './Loader.js';
 import {Viewer} from './Viewer.js';
@@ -108,7 +108,7 @@ class ModelElement extends HTMLElement {
   }
 
   get loaded() {
-    return this.model instanceof THREE.Object3D;
+    return this.model instanceof Object3D;
   }
 
   get src() {
@@ -164,7 +164,7 @@ class AnnotationElement extends HTMLElement {
   disconnectedCallback() {
     if ( this._annotation ) {
       this._annotation.removeFromParent();
-      if ( this._annotation instanceof THREE.Object3D ) {
+      if ( this._annotation instanceof Object3D ) {
         this._annotation.geometry.dispose();
         this._annotation.material.dispose();
       }
@@ -179,10 +179,10 @@ class AnnotationElement extends HTMLElement {
     if ( this._annotation ) {
       return this._annotation;
     }
-    const annoteM = new THREE.MeshStandardMaterial( {color: this.color} );
+    const annoteM = new MeshStandardMaterial( {color: this.color} );
     if ( this.kind === 'sphere' ) {
-      const geometry = new THREE.SphereGeometry( 0.5 );
-      const sphere = new THREE.Mesh( geometry, annoteM );
+      const geometry = new SphereGeometry( 0.5 );
+      const sphere = new Mesh( geometry, annoteM );
       const position = this.positionInGeometry();
       sphere.position.set( position.x, position.y, position.z );
       this._annotation = sphere;
@@ -202,18 +202,18 @@ class AnnotationElement extends HTMLElement {
         console.error( 'Invalid length' );
       }
 
-      const geometry = new THREE.CylinderGeometry( 0.2, 0.2, position[0].distanceTo( position[1] ), 20 );
-      const cylinder = new THREE.Mesh( geometry, annoteM );
-      const midpoint = new THREE.Vector3();
+      const geometry = new CylinderGeometry( 0.2, 0.2, position[0].distanceTo( position[1] ), 20 );
+      const cylinder = new Mesh( geometry, annoteM );
+      const midpoint = new Vector3();
       midpoint.addVectors( position[0], position[1] );
       midpoint.divideScalar( 2 );
       cylinder.position.set( midpoint.x, midpoint.y, midpoint.z );
 
-      const normal = new THREE.Vector3();
+      const normal = new Vector3();
       normal.subVectors( position[1], position[0] );
       normal.normalize();
-      const rotation = new THREE.Quaternion();
-      rotation.setFromUnitVectors( new THREE.Vector3( 0, 1, 0 ), normal );
+      const rotation = new Quaternion();
+      rotation.setFromUnitVectors( new Vector3( 0, 1, 0 ), normal );
 
       cylinder.applyQuaternion( rotation );
 
@@ -230,13 +230,13 @@ class AnnotationElement extends HTMLElement {
       const [reference, position] = p.split( '=' );
       if ( reference == 'absolute' ) {
         const [x, y, z] = position.split( ',' );
-        out.push( new THREE.Vector3( x, y, z ) );
+        out.push( new Vector3( x, y, z ) );
       } else if ( reference == 'vertex' ) {
         const p = parseInt( position );
         const x = geometry.getAttribute( 'position' ).getX( p );
         const y = geometry.getAttribute( 'position' ).getY( p );
         const z = geometry.getAttribute( 'position' ).getZ( p );
-        out.push( new THREE.Vector3( x, y, z ) );
+        out.push( new Vector3( x, y, z ) );
       }
     }
     if ( out.length === 1) {
@@ -327,9 +327,9 @@ class ViewerElement extends HTMLElement {
       grid: this.grid,
       axis_helper: this.axis_helper,
       controls: this.controls,
-      camera_position: new THREE.Vector3( 1, 1, 1 ),
+      camera_position: new Vector3( 1, 1, 1 ),
       camera_zoom: this.camera_zoom,
-      camera_up: new THREE.Vector3( 0, 1, 0 ),
+      camera_up: new Vector3( 0, 1, 0 ),
       toolbar: this.toolbar,
       help: this.help,
     };

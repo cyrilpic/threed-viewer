@@ -7,7 +7,8 @@
   "module": "dist/threed-viewer.esm.js",
   "scripts": {
     "build": "rollup -c",
-    "dev": "rollup -c -w",
+    "build:dev": "rollup -c -w",
+    "dev": "concurrently \"npm:build:dev\" \"npm:serve\"",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "./node_modules/.bin/eslint \"src/**/*.js\"",
     "lint:fix": "npm run lint -- --fix",
@@ -28,6 +29,7 @@
     "@fortawesome/free-regular-svg-icons": "^5.15.4",
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
     "@rollup/plugin-node-resolve": "^13.0.6",
+    "concurrently": "^6.4.0",
     "eslint": "^7.32.0",
     "eslint-config-google": "^0.14.0",
     "http-server": "^14.0.0",

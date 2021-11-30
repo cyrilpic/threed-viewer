@@ -8,7 +8,7 @@ import {BoxGeometry, CanvasTexture, Color, Euler, Mesh, MeshBasicMaterial,
  */
 class AxisHelper extends Object3D {
   /**
-   * @param {!THREE.Camera} editorCamera camera object from the main viewer.
+   * @param {!Camera} editorCamera camera object from the main viewer.
    * @param {!HTMLElement} container DOM element to add the axis.
    */
   constructor( editorCamera, container ) {

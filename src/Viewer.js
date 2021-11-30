@@ -1,4 +1,6 @@
-import * as THREE from 'three';
+import {AlwaysDepth, AmbientLight, Clock, DirectionalLight, GridHelper, Group,
+  MathUtils, OrthographicCamera, Scene, sRGBEncoding, Vector3,
+  WebGLRenderer} from 'three';
 
 import {icon} from '@fortawesome/fontawesome-svg-core';
 import {faUndo} from '@fortawesome/free-solid-svg-icons';
@@ -28,9 +30,9 @@ class Viewer {
       grid: true,
       axis_helper: true,
       controls: true,
-      camera_position: new THREE.Vector3( 1, 1, 1 ),
+      camera_position: new Vector3( 1, 1, 1 ),
       camera_zoom: 1,
-      camera_up: new THREE.Vector3( 0, 1, 0 ),
+      camera_up: new Vector3( 0, 1, 0 ),
       toolbar: true,
       help: true,
     };
@@ -39,11 +41,11 @@ class Viewer {
     }
 
     // Create scene
-    this.scene = new THREE.Scene();
+    this.scene = new Scene();
 
     // Create camera
     const opos = this.getOthographicPosition();
-    this.camera = new THREE.OrthographicCamera( opos[0], opos[1], opos[2], opos[3], -2000, 2000 );
+    this.camera = new OrthographicCamera( opos[0], opos[1], opos[2], opos[3], -2000, 2000 );
     this.camera.position.copy( options.camera_position );
     this.camera.position.multiplyScalar( perspectiveDistance );
     this.camera.zoom = options.camera_zoom;
@@ -52,16 +54,16 @@ class Viewer {
     this.scene.add( this.camera );
 
     //
-    this.a_light = new THREE.AmbientLight( 0x404040, 0.3 );
+    this.a_light = new AmbientLight( 0x404040, 0.3 );
     this.scene.add( this.a_light );
     // Directional light attached to camera
-    this.d_light = new THREE.DirectionalLight( 0xffffff, 0.6, {castShadow: true} );
+    this.d_light = new DirectionalLight( 0xffffff, 0.6, {castShadow: true} );
     this.camera.add( this.d_light );
 
     //
-    this.renderer = new THREE.WebGLRenderer( {antialias: true} );
+    this.renderer = new WebGLRenderer( {antialias: true} );
     this.renderer.setPixelRatio( window.devicePixelRatio );
-    this.renderer.outputEncoding = THREE.sRGBEncoding;
+    this.renderer.outputEncoding = sRGBEncoding;
     this.renderer.setSize( container.clientWidth, container.clientHeight );
     this.renderer.setClearColor( 0xaaaaaa );
 
@@ -83,16 +85,16 @@ class Viewer {
     this.controls.setGizmosVisible( false );
 
     // Helpers
-    this.grid = new THREE.Group();
+    this.grid = new Group();
 
-    const grid1 = new THREE.GridHelper( 30, 30, 0x888888 );
+    const grid1 = new GridHelper( 30, 30, 0x888888 );
     grid1.material.color.setHex( 0x888888 );
     grid1.material.vertexColors = false;
     this.grid.add( grid1 );
 
-    const grid2 = new THREE.GridHelper( 30, 6, 0x222222 );
+    const grid2 = new GridHelper( 30, 6, 0x222222 );
     grid2.material.color.setHex( 0x222222 );
-    grid2.material.depthFunc = THREE.AlwaysDepth;
+    grid2.material.depthFunc = AlwaysDepth;
     grid2.material.vertexColors = false;
     this.grid.add( grid2 );
 
@@ -102,7 +104,7 @@ class Viewer {
     this.view_axes.controls = this.controls;
     this.view_axes.visible = options.axis_helper;
     //
-    this.clock = new THREE.Clock();
+    this.clock = new Clock();
 
     this.animating = false;
     const animate = () => {
@@ -153,7 +155,7 @@ class Viewer {
 
   getOthographicPosition() {
     const aspect = this.container.clientWidth / this.container.clientHeight;
-    const halfFovV = THREE.MathUtils.DEG2RAD * 45 * 0.5;
+    const halfFovV = MathUtils.DEG2RAD * 45 * 0.5;
     const halfFovH = Math.atan( ( aspect ) * Math.tan( halfFovV ) );
     const halfW = perspectiveDistance * Math.tan( halfFovH );
     const halfH = perspectiveDistance * Math.tan( halfFovV );
