@@ -11,6 +11,9 @@ export default [
       file: pkg.main,
       format: 'umd',
       sourcemap: true,
+      amd: {
+        autoId: true,
+      },
     },
     plugins: [
       resolve(), // so Rollup can find `three`
