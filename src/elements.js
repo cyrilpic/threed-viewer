@@ -1,4 +1,4 @@
-import {CylinderGeometry, Object3D, Mesh, MeshStandardMaterial,
+import {CylinderGeometry, Object3D, Mesh, MeshStandardMaterial, Quaternion,
   SphereGeometry, Vector3} from 'three';
 import {CSS2DObject} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import {Loader} from './Loader.js';
@@ -338,10 +338,12 @@ class ViewerElement extends HTMLElement {
   }
 
   updateSize() {
-    const viewerCssRule = this.shadowRoot.styleSheets[0].cssRules[0];
-    viewerCssRule.style.height = this.getAttribute('height');
-    viewerCssRule.style.width = this.getAttribute('width');
-    if ( this.viewer ) this.viewer.resize();
+    if ( this.shadowRoot.styleSheets.length > 0 ) {
+      const viewerCssRule = this.shadowRoot.styleSheets[0].cssRules[0];
+      viewerCssRule.style.height = this.getAttribute('height');
+      viewerCssRule.style.width = this.getAttribute('width');
+      if ( this.viewer ) this.viewer.resize();
+    }
   }
 
 
