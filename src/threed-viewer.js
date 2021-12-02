@@ -1,5 +1,8 @@
-import {AnnotationElement, ModelElement, ViewerElement} from './elements.js';
+import * as THREE from 'three';
 
-customElements.define( 'threed-viewer', ViewerElement );
-customElements.define( 'threed-annotation', AnnotationElement );
-customElements.define( 'threed-model', ModelElement );
+import {Loader} from './Loader.js';
+import {Viewer} from './Viewer.js';
+
+import './elements.js';
+
+export {Loader, Viewer, THREE};

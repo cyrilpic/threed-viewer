@@ -183,8 +183,7 @@ class AnnotationElement extends HTMLElement {
     if ( this.kind === 'sphere' ) {
       const geometry = new SphereGeometry( 0.5 );
       const sphere = new Mesh( geometry, annoteM );
-      const position = this.positionInGeometry();
-      sphere.position.set( position.x, position.y, position.z );
+      sphere.position.copy( this.positionInGeometry() );
       this._annotation = sphere;
     } else if ( this.kind === 'label' ) {
       const labelDiv = document.createElement( 'div' );
@@ -193,8 +192,7 @@ class AnnotationElement extends HTMLElement {
       labelDiv.style.marginTop = '-1em';
       labelDiv.style.color = this.color;
       const label = new CSS2DObject( labelDiv );
-      const position = this.positionInGeometry();
-      label.position.set( position.x, position.y, position.z );
+      label.position.copy( this.positionInGeometry() );
       this._annotation = label;
     } else if ( this.kind === 'cylinder' ) {
       const position = this.positionInGeometry();
@@ -219,6 +217,11 @@ class AnnotationElement extends HTMLElement {
 
       this._annotation = cylinder;
     }
+
+    if ( this._annotation ) {
+      this._annotation.name = 'annotation';
+    }
+
     return this._annotation;
   }
 
@@ -229,7 +232,7 @@ class AnnotationElement extends HTMLElement {
     for ( const p of parts ) {
       const [reference, position] = p.split( '=' );
       if ( reference == 'absolute' ) {
-        const [x, y, z] = position.split( ',' );
+        const [x, y, z] = position.split( ',' ).map( (el) => parseFloat(el) );
         out.push( new Vector3( x, y, z ) );
       } else if ( reference == 'vertex' ) {
         const p = parseInt( position );
@@ -394,5 +397,9 @@ class ViewerElement extends HTMLElement {
     }
   }
 }
+
+customElements.define( 'threed-viewer', ViewerElement );
+customElements.define( 'threed-annotation', AnnotationElement );
+customElements.define( 'threed-model', ModelElement );
 
 export {AnnotationElement, ModelElement, ViewerElement};

@@ -21,7 +21,7 @@ class Loader {
 
     loader.load( options.src, (geom) => {
       const model = new Group();
-      if (geom.hasColor) console.log('hasColor');
+
       // Scale down to match view
       const size = new Vector3();
       if ( options.center ) {
@@ -36,9 +36,13 @@ class Loader {
         geom.scale( options.scale, options.scale, options.scale );
       }
 
-      model.add( new Mesh( geom, facesM ) );
+      const mesh = new Mesh( geom, facesM );
+      mesh.name = 'main-mesh';
+      model.add( mesh );
 
-      model.add( new LineSegments( new EdgesGeometry( geom ), wireM ) );
+      const edges = new LineSegments( new EdgesGeometry( geom ), wireM );
+      edges.name = 'edges';
+      model.add( edges );
 
       onLoad( geom, model );
     } );
