@@ -328,10 +328,10 @@ class ViewerElement extends HTMLElement {
 
     const options = {
       grid: this.grid,
-      axis_helper: this.axis_helper,
+      axis_helper: this.axisHelper,
       controls: this.controls,
       camera_position: new Vector3( 1, 1, 1 ),
-      camera_zoom: this.camera_zoom,
+      camera_zoom: this.cameraZoom,
       camera_up: new Vector3( 0, 1, 0 ),
       toolbar: this.toolbar,
       help: this.help,
@@ -354,7 +354,7 @@ class ViewerElement extends HTMLElement {
     return this.getAttribute('src');
   }
 
-  get camera_zoom() {
+  get cameraZoom() {
     if ( this.hasAttribute( 'camera-zoom' ) ) {
       return parseFloat( this.getAttribute( 'camera-zoom' ) );
     } else {
@@ -366,7 +366,7 @@ class ViewerElement extends HTMLElement {
     return this.hasAttribute('grid');
   }
 
-  get axis_helper() {
+  get axisHelper() {
     return this.hasAttribute('axis-helper');
   }
 
@@ -383,7 +383,7 @@ class ViewerElement extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['width', 'height'];
+    return ['width', 'height', 'axis-helper'];
   }
   // Monitor changes to HTML attributes
   attributeChangedCallback(name, oldValue, newValue) {
@@ -391,6 +391,12 @@ class ViewerElement extends HTMLElement {
       case 'width':
       case 'height':
         this.updateSize();
+        break;
+      case 'axis-helper':
+        if ( this.viewer ) {
+          this.viewer.viewAxes.visible = !( newValue === null );
+          this.viewer.animating = true;
+        }
         break;
       default:
         break;

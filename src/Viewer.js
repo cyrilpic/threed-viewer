@@ -100,9 +100,9 @@ class Viewer {
 
     this.grid.visible = options.grid;
 
-    this.view_axes = new AxisHelper( this.camera, container );
-    this.view_axes.controls = this.controls;
-    this.view_axes.visible = options.axis_helper;
+    this.viewAxes = new AxisHelper( this.camera, container );
+    this.viewAxes.controls = this.controls;
+    this.viewAxes.visible = options.axis_helper;
     //
     this.clock = new Clock();
 
@@ -111,8 +111,8 @@ class Viewer {
       let needsUpdate = scope.animating;
       const delta = scope.clock.getDelta();
 
-      if ( scope.view_axes.animating === true ) {
-        scope.view_axes.update(delta);
+      if ( scope.viewAxes.animating === true ) {
+        scope.viewAxes.update(delta);
         needsUpdate = true;
       }
 
@@ -231,7 +231,7 @@ class Viewer {
     this.labelRenderer.render( this.scene, this.camera );
 
     this.renderer.autoClear = false;
-    this.view_axes.render( this.renderer );
+    this.viewAxes.render( this.renderer );
     this.renderer.autoClear = true;
   }
 }
