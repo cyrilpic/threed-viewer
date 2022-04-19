@@ -111,6 +111,27 @@ class ModelElement extends HTMLElement {
     return this.model instanceof Object3D;
   }
 
+  static get observedAttributes() {
+    return ['face-color', 'edge-color'];
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if ( !this.loaded ) {
+      return;
+    }
+    switch ( name ) {
+      case 'face-color':
+        this.model.getObjectByName('main-mesh').material.color.setStyle(this.faceColor);
+        break;
+      case 'edge-color':
+        this.model.getObjectByName('edges').material.color.setStyle(this.edgeColor);
+        break;
+      default:
+        break;
+    }
+    this.dispatchEvent( new UpdateEvent() );
+  }
+
   get src() {
     if ( !this.hasAttribute('src') || !!!this.getAttribute('src') ) {
       const aTag = this.querySelector( 'a' );
@@ -136,6 +157,20 @@ class ModelElement extends HTMLElement {
 
   get center() {
     return this.hasAttribute('center');
+  }
+
+  get faceColor() {
+    if ( this.hasAttribute( 'face-color' ) ) {
+      return this.getAttribute( 'face-color' );
+    }
+    return '#9dc2cf';
+  }
+
+  get edgeColor() {
+    if ( this.hasAttribute( 'edge-color' ) ) {
+      return this.getAttribute( 'edge-color' );
+    }
+    return '#ff0000';
   }
 }
 

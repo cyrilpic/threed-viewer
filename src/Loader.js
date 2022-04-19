@@ -5,8 +5,8 @@ import {STLLoader} from 'three/examples/jsm/loaders/STLLoader.js';
 
 class Loader {
   constructor( options, onLoad ) {
-    const wireM = new LineBasicMaterial( {color: 0xff0000, linewidth: 1} );
-    const facesM = new MeshStandardMaterial( {color: 0x9dc2cf} );
+    const wireM = new LineBasicMaterial( {color: options.edgeColor, linewidth: 1} );
+    const facesM = new MeshStandardMaterial( {color: options.faceColor} );
 
     const loader = new STLLoader();
     // if ( options.src.endsWith( '.stl' ) ) {
