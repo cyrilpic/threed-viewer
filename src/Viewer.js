@@ -1,9 +1,10 @@
 import {AlwaysDepth, AmbientLight, Clock, DirectionalLight, GridHelper, Group,
-  MathUtils, OrthographicCamera, Scene, sRGBEncoding, Vector3,
+  MathUtils, Object3D, OrthographicCamera, Scene, sRGBEncoding, Vector3,
   WebGLRenderer} from 'three';
 
 import {icon} from '@fortawesome/fontawesome-svg-core';
-import {faUndo} from '@fortawesome/free-solid-svg-icons';
+import {faUndo, faExpandArrowsAlt} from '@fortawesome/free-solid-svg-icons';
+import {faSquare} from '@fortawesome/free-regular-svg-icons';
 
 import {ArcballControls} from 'three/examples/jsm/controls/ArcballControls.js';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
@@ -35,11 +36,13 @@ class Viewer {
       camera_up: new Vector3( 0, 1, 0 ),
       toolbar: true,
       help: true,
+      wireframe: true,
     };
     if ( selectedOptions !== null ) {
       Object.assign( options, selectedOptions );
     }
 
+    this.wireframeVisible = options.wireframe;
     // Create scene
     this.scene = new Scene();
 
@@ -75,9 +78,18 @@ class Viewer {
     this.labelRenderer.domElement.style.top = '0px';
     container.appendChild( this.labelRenderer.domElement );
 
-    window.addEventListener( 'resize', (e) => {
-      scope.resize();
-    } );
+    this.needsResize = false;
+
+    if (typeof window.ResizeObserver !== 'undefined') {
+      const obs = new window.ResizeObserver( (entries) => {
+        scope.needsResize = true;
+      } );
+      obs.observe( this.container );
+    } else {
+      window.addEventListener( 'resize', (e) => {
+        scope.needsResize = true;
+      } );
+    }
 
     // Controls
     this.controls = new ArcballControls( this.camera, this.labelRenderer.domElement, this.scene );
@@ -109,6 +121,13 @@ class Viewer {
     this.animating = false;
     const animate = () => {
       let needsUpdate = scope.animating;
+
+      if ( scope.needsResize ) {
+        scope.resize();
+        scope.needsResize = false;
+        needsUpdate = true;
+      }
+
       const delta = scope.clock.getDelta();
 
       if ( scope.viewAxes.animating === true ) {
@@ -128,7 +147,6 @@ class Viewer {
       this.buildToolbar( options );
     }
 
-
     // Message center
     this.message_dom = document.createElement( 'div' );
     this.message_dom.setAttribute( 'id', 'message_wrapper' );
@@ -139,12 +157,11 @@ class Viewer {
     this.container.appendChild( this.message_dom );
 
     // Help
-    if ( ( options.help !== false ) && ( options.help !== null ) ) {
-      this.helpDom = document.createElement( 'div' );
-      this.helpDom.setAttribute( 'id', 'help' );
-      this.helpDom.innerText = 'Scroll to zoom / Drag to rotate / Drag & left-click to pan';
-      this.container.appendChild( this.helpDom );
-    }
+    this.helpDom = document.createElement( 'div' );
+    this.helpDom.setAttribute( 'id', 'help' );
+    this.helpDom.innerText = 'Scroll to zoom / Drag to rotate / Drag & left-click to pan';
+    this.helpDom.style.visibility = ( ( options.help !== false ) && ( options.help !== null ) );
+    this.container.appendChild( this.helpDom );
 
     this.animating = true;
     this.renderer.setAnimationLoop( animate );
@@ -174,8 +191,6 @@ class Viewer {
         this.container.clientHeight );
     this.labelRenderer.setSize( this.container.clientWidth,
         this.container.clientHeight );
-
-    this.animating = true;
   }
 
   buildToolbar( options ) {
@@ -193,15 +208,27 @@ class Viewer {
           scope.controls.reset();
           scope.showMessage( 'Reset view' );
           break;
+        case 'wireframe':
+          this.toggleWireframeVisibility();
+          scope.showMessage( 'Toggle wireframe visibility' );
+          break;
         default:
           break;
       }
     };
 
     // Reset
-    const reset_btn = new Button( 'reset-view', this.handleEvents, icon( faUndo ).html );
-    this.toolbar.appendChild( reset_btn.dom );
-    this.buttons['reset_btn'] = reset_btn;
+    const resetBtn = new Button( 'reset-view', this.handleEvents, icon( faUndo ).html, undefined, 'Reset view' );
+    this.toolbar.appendChild( resetBtn.dom );
+    this.buttons['reset_btn'] = resetBtn;
+
+    // View wireframe
+    const _selectedSquare = icon( faSquare ).node[0];
+    _selectedSquare.classList.add( 'selected' );
+    const wirefBtn = new Button( 'wireframe', this.handleEvents, icon( faSquare ).html, _selectedSquare.outerHTML, 'Toggle wireframe' );
+    wirefBtn.toggle( this.wireframeVisible );
+    this.toolbar.appendChild( wirefBtn.dom );
+    this.buttons['wiref_btn'] = wirefBtn;
   }
 
   showMessage( message ) {
@@ -218,7 +245,25 @@ class Viewer {
   }
 
   addContent( object ) {
+    const edges = object.getObjectByName( 'edges' );
+    if ( edges instanceof Object3D ) {
+      edges.visible = this.wireframeVisible;
+    }
     this.scene.add( object );
+    this.animating = true;
+  }
+
+  toggleWireframeVisibility( targetValue ) {
+    if ( targetValue !== undefined ) {
+      this.wireframeVisible = targetValue;
+    } else {
+      this.wireframeVisible = !this.wireframeVisible;
+    }
+    this.scene.traverse( (el) => {
+      if ( el.name == 'edges' ) {
+        el.visible = this.wireframeVisible;
+      }
+    } );
     this.animating = true;
   }
 
