@@ -3,7 +3,7 @@ import {AlwaysDepth, AmbientLight, Clock, DirectionalLight, GridHelper, Group,
   WebGLRenderer} from 'three';
 
 import {icon} from '@fortawesome/fontawesome-svg-core';
-import {faUndo, faExpandArrowsAlt} from '@fortawesome/free-solid-svg-icons';
+import {faUndo} from '@fortawesome/free-solid-svg-icons';
 import {faSquare} from '@fortawesome/free-regular-svg-icons';
 
 import {ArcballControls} from 'three/examples/jsm/controls/ArcballControls.js';
