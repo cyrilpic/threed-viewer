@@ -68,7 +68,6 @@ class Loader {
         model.add( edges );
       } else {
         // Scene
-        console.log( 'Mesh' );
         model = mesh;
         if ( options.center || options.scale !== false ) {
           const m1 = new Matrix4();
@@ -114,6 +113,10 @@ class Loader {
         clearcoat: 0.5, clearcoatRoughness: 0.5} );
 
       this.loaders.stl.load( options.src, (geom) => {
+        if ( geom.hasColors ) {
+          facesM.opacity = geom.alpha;
+          facesM.vertexColors = true;
+        }
         const mesh = new Mesh( geom, facesM );
         mesh.name = 'main-mesh';
         process( geom, mesh );
