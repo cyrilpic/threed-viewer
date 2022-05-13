@@ -245,10 +245,11 @@ class Viewer {
   }
 
   addContent( object ) {
-    const edges = object.getObjectByName( 'edges' );
-    if ( edges instanceof Object3D ) {
-      edges.visible = this.wireframeVisible;
-    }
+    object.traverse( (el) => {
+      if ( el.name == 'edges' ) {
+        el.visible = this.wireframeVisible;
+      }
+    } );
     this.scene.add( object );
     this.animating = true;
   }
