@@ -1,0 +1,114 @@
+.toggle-switch {
+    /** bar */
+    --bar-height: 14px;
+    --bar-width: 32px;
+    --bar-color: #eee;
+
+    /** knob */
+    --knob-size: 20px;
+    --knob-color: #fff;
+
+    /** switch */
+    --switch-offset: calc(var(--knob-size) - var(--bar-height));
+    --switch-width: calc(var(--bar-width) + var(--switch-offset));
+    --transition-duration: 200ms;
+    --switch-transition: all var(--transition-duration) ease-in-out;
+    --switch-theme-rgb: 26, 115, 232;
+    --switch-theme-color: rgb(var(--switch-theme-rgb));
+    --switch-box-shadow: 0 0 var(--switch-offset) #11111180;
+    --switch-margin: 8px;
+
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    min-width: var(--bar-width);
+    min-height: var(--bar-height);
+    margin: var(--switch-margin);
+    user-select: none;
+}
+
+.toggle-switch.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.toggle-switch > input,
+.toggle-switch-input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+}
+
+.toggle-switch > label,
+.toggle-switch-label {
+    --knob-x: calc((var(--bar-height) - var(--bar-width)) / 2);
+
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: var(--bar-width);
+    height: var(--bar-height);
+    margin: var(--switch-margin);
+    user-select: none;
+}
+
+/* checked */
+.toggle-switch > :checked + label,
+:checked + .toggle-switch-label {
+    --knob-x: calc((var(--bar-width) - var(--bar-height)) / 2);
+}
+
+/* bar */
+.toggle-switch > label::before,
+.toggle-switch-label::before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    width: var(--bar-width);
+    height: var(--bar-height);
+    background: var(--bar-color);
+    border: 1px solid var(--switch-theme-color);
+    border-radius: var(--bar-height);
+    opacity: 0.5;
+    transition: var(--switch-transition);
+    content: "";
+}
+
+/* checked bar */
+.toggle-switch > :checked + label::before,
+:checked + .toggle-switch-label::before {
+    background: var(--switch-theme-color);
+}
+
+/* knob */
+.toggle-switch > label::after,
+.toggle-switch-label::after {
+    box-sizing: border-box;
+    width: var(--knob-size);
+    height: var(--knob-size);
+    background: var(--knob-color);
+    border-radius: 50%;
+    box-shadow: var(--switch-box-shadow);
+    transform: translateX(var(--knob-x));
+    transition: var(--switch-transition);
+    content: "";
+}
+
+/* checked knob */
+.toggle-switch > :checked + label::after,
+:checked + .toggle-switch-label::after {
+    background: var(--switch-theme-color);
+}
+
+/* hover & focus knob */
+.toggle-switch > :focus + label::after,
+:focus + .toggle-switch-label::after,
+.toggle-switch:hover > label::after,
+:hover > .toggle-switch-label::after {
+    box-shadow: var(--switch-box-shadow), 0 0 0 calc(var(--knob-size) / 2) rgba(var(--switch-theme-rgb), 0.2);
+}
