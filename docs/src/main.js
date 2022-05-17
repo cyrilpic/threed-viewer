@@ -7,8 +7,8 @@ import '../node_modules/normalize.css/normalize.css'
 import '../node_modules/prismjs/themes/prism.css';
 import './style.css';
 
-loader.loaders.ktx2.setTranscoderPath( '/libs/basis/' );
-loader.loaders.draco.setDecoderPath( '/libs/draco/' );
+loader.loaders.ktx2.setTranscoderPath( './libs/basis/' );
+loader.loaders.draco.setDecoderPath( './libs/draco/' );
 
 const syncEditor = (container, code) => {
   const node = container.cloneNode(true);

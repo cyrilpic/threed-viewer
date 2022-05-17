@@ -10,9 +10,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "npx eslint \"src/**/*.js\"",
     "lint:fix": "npm run lint -- --fix",
-    "serve": "npm run build && npx http-server -c-1 -o /",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d ./"
+    "serve": "npm run build && npx http-server build -c-1 -o /",
+    "predeploy": "npm run build && touch build/.nojekyll",
+    "deploy": "gh-pages -d ./build -t true"
   },
   "author": "",
   "license": "ISC",
@@ -30,6 +30,7 @@
     "cssnano": "^5.1.7",
     "gh-pages": "^4.0.0",
     "normalize.css": "^8.0.1",
+    "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-postcss": "^4.0.2"
   }
 }
