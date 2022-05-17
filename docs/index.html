@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Threed-Viewer | Annotations</title>
+    <link href="/dist/main.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <div class="top-nav">
+        <span class="logo">Threed-Viewer</span>
+        <a href="/">Home</a>
+        <a href="/demo.html">Demo</a>
+        <a href="https://github.com/cyrilpic/threed-viewer">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32.58 31.77" width="23px" height="23px"><path d="M16.29 0C7.29 0 0 7.29 0 16.29c0 7.2 4.67 13.3 11.14 15.46.81.15 1.11-.35 1.11-.79 0-.39-.01-1.41-.02-2.77-4.53.98-5.49-2.18-5.49-2.18-.74-1.88-1.81-2.38-1.81-2.38-1.48-1.01.11-.99.11-.99 1.63.12 2.5 1.68 2.5 1.68 1.45 2.49 3.81 1.77 4.74 1.35.15-1.05.57-1.77 1.03-2.18-3.62-.41-7.42-1.81-7.42-8.05 0-1.78.63-3.23 1.68-4.37-.17-.41-.73-2.07.16-4.31 0 0 1.37-.44 4.48 1.67 1.3-.36 2.69-.54 4.08-.55 1.38 0 2.78.19 4.08.55 3.11-2.11 4.48-1.67 4.48-1.67.89 2.24.33 3.9.16 4.31 1.04 1.14 1.67 2.59 1.67 4.37 0 6.26-3.81 7.63-7.44 8.04.58.5 1.11 1.5 1.11 3.02 0 2.18-.02 3.93-.02 4.47 0 .44.29.94 1.12.78 6.47-2.16 11.13-8.26 11.13-15.45C32.58 7.29 25.29 0 16.29 0Z" style="fill:#191717;fill-rule:evenodd"/></svg>
+        </a>
+    </div>
+    <div class="page">
+        <nav class="main-nav">
+            <ol>
+                <li><a href="#whats">What's threed-viewer?</a></li>
+                <li><a href="#getting-started">Getting started</a></li>
+                <li><a href="#examples">More examples</a>
+                    <ol>
+                        <li><a href="#ex1-h">GLB Scene</a></li>
+                        <li><a href="#ex2-h">Annotations</a></li>
+                    </ol>
+                </li>
+            </ol>
+        </nav>
+        <main>
+            <article class="container">
+                <h1 id="whats">What's threed-viewer?</h1>
+                <p>Threed-viewer is a custom configuration of a <a href="https://threejs.org">three.js</a> that uses HTML custom elements (v1) to ease the creation of scenes. It follows some ideas from <a href="http://modelviewer.dev">modelviewer</a>, but has a focus on rendering parts for a mechanical engineering CAD-alike context (for example with the use of an orthographic camera).</p>
+                <p>It relies on three custom elements: <code class="language-html">&lt;threed-viewer&gt;</code>, <code class="language-html">&lt;threed-model&gt;</code>, and
+                    <code class="language-html">&lt;threed-annotation&gt;</code>.</p>
+                
+                <h2 id="getting-started">Getting started</h2>
+                <p>To use the library, it is sufficient to include the bundled javascript and to add the appropriate tags.
+                    The following code will generate the viewer below.</p>
+                <div class="flex-grid grid-centered">
+                    <pre class="language-html"><code class="language-html output" data-viewer-id="#v1"></code></pre>
+                    <threed-viewer id="v1" width="500px" height="350px" controls help axis-helper toolbar wireframe>
+                        <threed-model center scale src="/models/round.stl"></threed-model>
+                    </threed-viewer>
+                </div>
+                <p>The best way to explore the options of threed-viewer is the test it live through the <a href="/demo.html">demo page</a>.
+                    In addition, examples shown next aim at representing most common use cases.
+                </p>
+                <h2 id="examples">More examples</h2>
+                <h3 id="ex1-h">GLB Scene</h3>
+                <p>Here a full scene created in Siemens NX (CAD Software) is exported and loaded as a single model. Centering has been disabled,
+                    so the original center uses the reference coordinates set in CAD. A wireframe model is added by the viewer with a custom color.
+                </p>
+                <threed-viewer id="ex1" width="100%" height="400px" controls help axis-helper toolbar wireframe camera-zoom="2">
+                    <threed-model scale edge-color="#333333" src="/models/roundNX.glb">
+                    </threed-model>
+                </threed-viewer>
+                <pre class="language-html"><code class="language-html output" data-viewer-id="#ex1"></code></pre>
+                <h3 id="ex2-h">Annotations</h3>
+                <p>This example highlights the possible annotations types, positioning rules, and options. Note that the text label is added
+                    on a layer on top of the 3D model and, as such, remains visible even if normally hidden by the model.</p>
+                <threed-viewer id="ex2" width="100%" height="700px" controls help axis-helper toolbar wireframe>
+                    <threed-model center scale src="/models/Form2.stl">
+                        <threed-annotation kind="sphere" color="#fa8911" position="vertex=16"></threed-annotation>
+                        <threed-annotation kind="sphere" color="#ff0000" position="absolute=2,2,7"></threed-annotation>
+                        <threed-annotation kind="label" color="#00ff00" position="absolute=4,3,1" text="A Label"></threed-annotation>
+                        <threed-annotation kind="cylinder" color="#8e7cc3" position="vertex=148;vertex=149"></threed-annotation>
+                    </threed-model>
+                </threed-viewer>
+                <pre class="language-html"><code class="language-html output" data-viewer-id="#ex2"></code></pre>
+            </article>
+        </main>
+    </div>
+    <div class="bottom">
+        <p>Built by Cyril Picard</p>
+    </div>
+    <script type="module" src="/dist/main.js"></script>
+</body>
+</html>

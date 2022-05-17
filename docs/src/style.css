@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+
+:root {
+    --main-padding: 30px;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Open Sans', sans-serif;
+}
+a {
+    color: #b7352d;
+}
+a:visited {
+    color: #b7352d;
+}
+p {
+    line-height: 1.5em;
+}
+p.small {
+    line-height: 1em;
+    font-size: 0.8em;
+    color: #999;
+}
+
+.container {
+    margin: var(--main-padding);
+}
+.container > h1 {
+    margin-top: 0;
+}
+.flex-row {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+.flex-grid {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 20px;
+}
+.grid-centered {
+    justify-content: center;
+}
+.flex-grid > pre {
+    margin: 0;
+}
+.control {
+    width: 35%;
+}
+.viewer {
+    width: 65%;
+}
+.input-group {
+    align-items: center;
+    display: inline-flex;
+}
+.input-group > label {
+    margin-right: 1em;
+}
+
+.top-nav {
+    padding: var(--main-padding);
+    border-bottom: 1px black solid;
+    display: flex;
+    align-items: center;
+}
+.top-nav .logo {
+    color: #b7352d;
+    font-size: 1.4rem;
+    font-weight: bold;
+    flex-grow: 2;
+}
+.top-nav a {
+    color: #000;
+    font-weight: bold;
+    padding-inline: 2em 0;
+    text-decoration: none;
+}
+.top-nav a:hover {
+    color: #666;
+}
+
+.bottom {
+    padding: var(--main-padding);
+    border-top: 1px black solid;
+}
+.bottom p {
+    margin: 0;
+    color: #979797;
+    font-style: italic;
+}
+
+.page {
+    display: flex;
+    min-height: 50vh;
+    flex-direction: row;
+    position: relative;
+}
+.main-nav {
+    width: 240px;
+    flex: 0 0 240px;
+    padding: var(--main-padding) 0 var(--main-padding) var(--main-padding);
+    height: calc(100vh - 88px - 85px);
+    position: sticky;
+    top: 0px;
+}
+.main-nav ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.main-nav > ol {
+    font-weight: bold;
+}
+.main-nav li {
+    margin: 0.5em 0 0;
+    padding: 0 0 0.5em;
+}
+.main-nav li > ol {
+    padding-left: 0.7em;
+    font-weight: normal;
+    margin-top: 1em;
+}
+.main-nav a {
+    text-decoration: none;
+    color: #000;
+}
+.main-nav a:hover {
+    text-decoration: underline;
+}
+
+main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
