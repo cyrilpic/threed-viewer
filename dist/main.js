@@ -7,8 +7,8 @@ import { s as simplyBeautiful } from './_virtual/index.js_commonjs-module.js';
 import * as three_module from './node_modules/three/build/three.module.js';
 export { three_module as THREE };
 
-loader.loaders.ktx2.setTranscoderPath( '/libs/basis/' );
-loader.loaders.draco.setDecoderPath( '/libs/draco/' );
+loader.loaders.ktx2.setTranscoderPath( './libs/basis/' );
+loader.loaders.draco.setDecoderPath( './libs/draco/' );
 
 const syncEditor = (container, code) => {
   const node = container.cloneNode(true);
