@@ -941,7 +941,7 @@ class ModelElement extends HTMLElement {
     if ( !this.hasAttribute('src') || !!!this.getAttribute('src') ) {
       const aTag = this.querySelector( 'a' );
       if ( aTag ) {
-        this.setAttribute( 'src', aTag.getAttribute( 'href' ) );
+        return aTag.getAttribute( 'href' );
       }
     }
     return this.getAttribute('src');

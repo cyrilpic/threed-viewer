@@ -24,7 +24,8 @@
                 <li><a href="#examples">More examples</a>
                     <ol>
                         <li><a href="#ex1-h">GLB Scene</a></li>
-                        <li><a href="#ex2-h">Annotations</a></li>
+                        <li><a href="#ex2-h">Use of links</a></li>
+                        <li><a href="#ex3-h">Annotations</a></li>
                     </ol>
                 </li>
             </ol>
@@ -54,14 +55,21 @@
                     so the original center uses the reference coordinates set in CAD. A wireframe model is added by the viewer with a custom color.
                 </p>
                 <threed-viewer id="ex1" width="100%" height="400px" controls help axis-helper toolbar wireframe camera-zoom="2">
-                    <threed-model scale edge-color="#333333" src="./models/roundNX.glb">
-                    </threed-model>
+                    <threed-model scale edge-color="#333333" src="./models/roundNX.glb"></threed-model>
                 </threed-viewer>
                 <pre class="language-html"><code class="language-html output" data-viewer-id="#ex1"></code></pre>
-                <h3 id="ex2-h">Annotations</h3>
+                <h3 id="ex2-h">Use of links</h3>
+                <p>Instead of specifying the URL of the model through the <code class="language-html">src</code> attribute, the URL can also
+                    be provided through a link tag <code class="language-html">&lt;a&gt;</code>. This is particularly useful when using
+                    this library through the <a href="https://github.com/ethz-let/moodle-filter_threedviewer">Moodle filter</a>.</p>
+                <threed-viewer id="ex2" width="100%" height="400px" controls toolbar wireframe>
+                    <threed-model scale center><a href="./models/roundNX.glb"></a></threed-model>
+                </threed-viewer>
+                <pre class="language-html"><code class="language-html output" data-viewer-id="#ex2"></code></pre>
+                <h3 id="ex3-h">Annotations</h3>
                 <p>This example highlights the possible annotations types, positioning rules, and options. Note that the text label is added
                     on a layer on top of the 3D model and, as such, remains visible even if normally hidden by the model.</p>
-                <threed-viewer id="ex2" width="100%" height="700px" controls help axis-helper toolbar wireframe>
+                <threed-viewer id="ex3" width="100%" height="700px" controls help axis-helper toolbar wireframe>
                     <threed-model center scale src="./models/Form2.stl">
                         <threed-annotation kind="sphere" color="#fa8911" position="vertex=16"></threed-annotation>
                         <threed-annotation kind="sphere" color="#ff0000" position="absolute=2,2,7"></threed-annotation>
@@ -69,7 +77,7 @@
                         <threed-annotation kind="cylinder" color="#8e7cc3" position="vertex=148;vertex=149"></threed-annotation>
                     </threed-model>
                 </threed-viewer>
-                <pre class="language-html"><code class="language-html output" data-viewer-id="#ex2"></code></pre>
+                <pre class="language-html"><code class="language-html output" data-viewer-id="#ex3"></code></pre>
             </article>
         </main>
     </div>
