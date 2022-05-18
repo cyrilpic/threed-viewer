@@ -1,7 +1,7 @@
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import postcss from 'rollup-plugin-postcss';
-import copy from 'rollup-plugin-copy';
+import copy from 'rollup-plugin-copy-glob';
 
 export default [
   // browser-friendly UMD build
@@ -23,12 +23,11 @@ export default [
       }),
       resolve(), // so Rollup can find `three`
       commonjs(),
-      copy({
-        targets: [
-          {src: '*.html', dest: 'build'},
-          {src: ['models', 'libs'], dest: 'build'},
-        ],
-      }),
+      copy([
+        {files: '*.html', dest: 'build'},
+        {files: 'models/*', dest: 'build/models'},
+        {files: 'libs/**/*', dest: 'build/libs'},
+      ], {verbose: true, watch: process.env.ROLLUP_WATCH === 'true'}),
     ],
   },
 ];
