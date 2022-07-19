@@ -159,7 +159,7 @@ class Viewer {
     // Help
     this.helpDom = document.createElement( 'div' );
     this.helpDom.setAttribute( 'id', 'help' );
-    this.helpDom.innerText = 'Scroll to zoom / Drag to rotate / Drag & left-click to pan';
+    this.helpDom.innerText = 'Scroll to zoom / Drag to rotate / Drag & right-click to pan';
     this.helpDom.style.visibility = ( ( options.help !== false ) && ( options.help !== null ) );
     this.container.appendChild( this.helpDom );
 
