@@ -7,7 +7,6 @@ import {KTX2Loader} from 'three/examples/jsm/loaders/KTX2Loader.js';
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
 import {MeshoptDecoder} from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 
-
 function _countMeshes( group ) {
   let count = 0;
   group.traverse( (el) => {
@@ -19,7 +18,34 @@ function _countMeshes( group ) {
 }
 
 class Loader {
+  async getModelType( src ) {
+    if ( src.endsWith( '.gltf' ) || src.endsWith( '.glb' ) ) {
+        return 'gltf';
+    } else if ( src.endsWith( '.stl' ) ) {
+        return 'stl';
+    } else {
+      try {
+        const response = await fetch( src, { method: "HEAD" } );
+        if ( response.ok ) {
+          const contentType = response.headers.get('content-type');
+          if ( contentType === 'model/gltf+json' ||
+              contentType === 'model/gltf-binary' ) {
+            return 'gltf';
+          } else if ( contentType === 'model/stl' ) {
+            return 'stl';
+          } else {
+            console.error( 'Model must be STL or GLTB' );
+            return null;
+          }
+        }
+      } catch (error) {
+        console.error(error.message);
+      }
+    }
+  }
+
   constructor() {
+    this.type = null; // 'stl' or 'gltf'
     this.manager = new LoadingManager();
     this.loaders = {
       stl: new STLLoader( this.manager ),
@@ -33,6 +59,7 @@ class Loader {
   }
 
   load( options, onLoad ) {
+
     const wireM = new LineBasicMaterial( {
       color: options.edgeColor || options.constructor.defaultEdgeColor,
       linewidth: 1} );
@@ -107,39 +134,38 @@ class Loader {
       onLoad( geom, model );
     };
 
-    if ( options.src.endsWith( '.stl' ) ) {
-      const facesM = new MeshPhysicalMaterial( {
-        color: options.faceColor || options.constructor.defaultFaceColor,
-        clearcoat: 0.5, clearcoatRoughness: 0.5} );
+    this.getModelType(options.src).then( (type) => {
+      if ( type == 'stl' ) {
+        const facesM = new MeshPhysicalMaterial( {
+          color: options.faceColor || options.constructor.defaultFaceColor,
+          clearcoat: 0.5, clearcoatRoughness: 0.5} );
 
-      this.loaders.stl.load( options.src, (geom) => {
-        if ( geom.hasColors ) {
-          facesM.opacity = geom.alpha;
-          facesM.vertexColors = true;
-        }
-        const mesh = new Mesh( geom, facesM );
-        mesh.name = 'main-mesh';
-        process( geom, mesh );
-      } );
-    } else if ( options.src.endsWith( '.gltf' ) ||
-        options.src.endsWith( '.glb' ) ) {
-      this.loaders.gltf.load( options.src, (gltf) => {
-        const count = _countMeshes(gltf.scene);
-        if ( count == 1 ) {
-          const mesh = gltf.scene.getObjectByProperty( 'type', 'Mesh' );
+        this.loaders.stl.load( options.src, (geom) => {
+          if ( geom.hasColors ) {
+            facesM.opacity = geom.alpha;
+            facesM.vertexColors = true;
+          }
+          const mesh = new Mesh( geom, facesM );
           mesh.name = 'main-mesh';
-          process( mesh.geometry, mesh );
-        } else if ( count > 1 ) {
-          gltf.scene.name = 'main-mesh';
-          // Add wireframe?
-          process( null, gltf.scene );
-        } else {
-          console.error( 'No mesh found in scene' );
-        }
-      } );
-    } else {
-      console.error( 'Model must be STL or GLTB' );
-    }
+          process( geom, mesh );
+        } );
+      } else if ( type == 'gltf' ) {
+        this.loaders.gltf.load( options.src, (gltf) => {
+          const count = _countMeshes(gltf.scene);
+          if ( count == 1 ) {
+            const mesh = gltf.scene.getObjectByProperty( 'type', 'Mesh' );
+            mesh.name = 'main-mesh';
+            process( mesh.geometry, mesh );
+          } else if ( count > 1 ) {
+            gltf.scene.name = 'main-mesh';
+            // Add wireframe?
+            process( null, gltf.scene );
+          } else {
+            console.error( 'No mesh found in scene' );
+          }
+        } );
+      }
+    });
   }
 }
 

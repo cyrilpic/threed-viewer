@@ -1,6 +1,6 @@
 import {AlwaysDepth, AmbientLight, Clock, DirectionalLight, GridHelper, Group,
-  MathUtils, Object3D, OrthographicCamera, Scene, sRGBEncoding, Vector3,
-  WebGLRenderer} from 'three';
+  MathUtils, Object3D, OrthographicCamera, Scene, Vector3, WebGLRenderer}
+  from 'three';
 
 import {icon} from '@fortawesome/fontawesome-svg-core';
 import {faUndo} from '@fortawesome/free-solid-svg-icons';
@@ -25,6 +25,7 @@ class Viewer {
   constructor( container, selectedOptions ) {
     const scope = this;
     this.container = container;
+    this.firstPaint = true;
 
     // Parse options
     const options = {
@@ -66,7 +67,6 @@ class Viewer {
     //
     this.renderer = new WebGLRenderer( {antialias: true} );
     this.renderer.setPixelRatio( window.devicePixelRatio );
-    this.renderer.outputEncoding = sRGBEncoding;
     this.renderer.setSize( container.clientWidth, container.clientHeight );
     this.renderer.setClearColor( 0xcccccc );
 
@@ -160,12 +160,18 @@ class Viewer {
     this.helpDom = document.createElement( 'div' );
     this.helpDom.setAttribute( 'id', 'help' );
     this.helpDom.innerText = 'Scroll to zoom / Drag to rotate / Drag & right-click to pan';
-    this.helpDom.style.visibility = ( ( options.help !== false ) && ( options.help !== null ) );
+    if (options.help === null || options.help === false) {
+        this.helpDom.style.visibility = 'hidden';
+    }
     this.container.appendChild( this.helpDom );
 
     this.animating = true;
     this.renderer.setAnimationLoop( animate );
     this.controls.addEventListener( 'change', () => {
+      if (this.firstPaint) {
+        this.firstPaint = false;
+        this.controls.reset();
+      }
       scope.render();
     } );
   }
